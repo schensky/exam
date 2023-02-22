@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { TableGridComponent } from './components/table-grid/table-grid.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {MockDataInterceptor} from "./interceptors/mock-data/mock-data.interceptor";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -16,6 +17,8 @@ import {MockDataInterceptor} from "./interceptors/mock-data/mock-data.intercepto
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [
     {

@@ -1,5 +1,25 @@
 <p>table-grid works!</p>
-{{total}}
-<button (click)="delete(34719)">remove</button>
+<!--<button (click)="delete(34719)">remove</button>-->
 <button (click)="update(34719)">update</button>
 <button (click)="create()">create</button>
+Total: {{this.total}}
+
+<form [formGroup]="EventGridForm">
+  <table  formArrayName="events">
+    <thead>
+      <tr>
+        <th></th>
+        <th *ngFor="let field of tableHeader;">{{field}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let event of eventRows.controls; let i = index" [formGroupName]="i">
+        <td (click)="remove(event)">X</td>
+        <td class="row" *ngFor="let field of tableHeader;" >
+          <input *ngIf="hasControl(event, field)" type="text" class="form-control" [formControlName]="field">
+        </td>
+      </tr>
+    </tbody>
+
+  </table>
+</form>

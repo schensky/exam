@@ -74,18 +74,22 @@ export class CowEventService implements ICrud<CowEvent> {
   ) { }
 
   create(data: CowEvent): Observable<IResponse<CowEvent>> {
+    console.log('PUT', `${this.apiUrl}/create`, data);
     return this.http.put<IResponse<CowEvent>>(`${this.apiUrl}/create`, data)
   }
 
   get(id?: number): Observable<IResponse<CowEvent>> {
+    console.log('GET', `${this.apiUrl}/get${id ? '/'+id : ''}`);
     return this.http.get<IResponse<CowEvent>>(`${this.apiUrl}/get${id ? '/'+id : ''}`)
   }
 
   update(id: number, data: CowEvent): Observable<IResponse<CowEvent>> {
+    console.log('POST', `${this.apiUrl}/update/${id}`, data);
     return this.http.post<IResponse<CowEvent>>(`${this.apiUrl}/update/${id}`, data)
   }
 
   delete(id: number): Observable<IResponse<CowEvent>> {
+    console.log('DELETE', `${this.apiUrl}/delete/${id}`);
     return this.http.delete<IResponse<CowEvent>>(`${this.apiUrl}/delete/${id}`)
   }
 }
