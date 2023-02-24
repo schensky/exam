@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {AnimalEvent, CowEventService} from "../../services/cow-event/cow-event.service";
-import {catchError, map, Observable, Subscription, throwError} from "rxjs";
+import {CowEvent, CowEventService} from "../../services/cow-event/cow-event.service";
+import {map, Subscription} from "rxjs";
 import {FormArray, FormBuilder, FormGroup, FormControl, AbstractControl} from "@angular/forms";
 
 @Component({
@@ -9,12 +9,9 @@ import {FormArray, FormBuilder, FormGroup, FormControl, AbstractControl} from "@
   styleUrls: ['./table-grid.component.scss']
 })
 export class TableGridComponent implements OnInit, OnDestroy {
-  limit!: number
-  total!: number
-
-  EventGridForm!: FormGroup
-  tableHeader: string[] = []
-  eventList: AnimalEvent[] = []
+  total: number = 0
+  commonFields: string[] = []
+  EventGridForm: FormGroup
 
   get eventRows(): FormArray {
     return <FormArray>this.EventGridForm.get('events')
@@ -33,124 +30,85 @@ export class TableGridComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.init();
-
-    this.eventRows.valueChanges.subscribe(res => {
-      console.log('valueChanges res', res);
-    })
   }
 
   init(): void {
-    this.cowEventService.get()
+    this.cowEventService.getAll()
       .pipe(map(res => {
-        this.limit = res.limit
         this.total = res.total
-
         return res.result
       }))
-      .subscribe((res: any) => {
-        console.log('get res', res);
-        this.eventList = res
-        this.buildEventGridForm()
+      .subscribe((res: CowEvent[]) => {
+        this.buildEventGridForm(res)
       });
   }
 
-  remove(control: AbstractControl): void{
-    this.cowEventService.delete((<FormGroup>control).get('eventId')?.value)
-      .pipe(map(res => {
-        this.limit = res.limit
-        this.total = res.total
-
-        return res.result
-      }))
-      .subscribe((res: any) => {
-        this.eventList = res
-        this.buildEventGridForm()
+  remove(index: number): void {
+    let id = this.eventRows.at(index).get('eventId')?.value
+    this.cowEventService.delete(id)
+      .subscribe(() => {
+        this.eventRows.removeAt(index)
+        this.total--
       });
   }
 
-  update(id: number): void {
-    const data: AnimalEvent = {
-      "healthIndex": 33,
-      "endDate": null,
-      "minValueDateTime": 1514844000,
-      "type": "systemHealth",
-      "cowId": 809,
-      "animalId": "871",
-      "eventId": 34719,
-      "deletable": false,
-      "lactationNumber": 1,
-      "daysInLactation": 357,
-      "ageInDays": 1075,
-      "startDateTime": 1514844000,
-      "reportingDateTime": 1514844929
-    }
-
-    this.cowEventService.update(id, data)
-      .pipe(map(res => {
-        this.limit = res.limit
-        this.total = res.total
-
-        return res.result
-      }))
-      .subscribe((res: any) => {
-      console.log('update res', res);
-        this.eventList = res
-        this.buildEventGridForm()
-    });
+  update(row: number, field: string): void {
+    this.cowEventService.update(
+      +this.eventRows.at(row).get('eventId')?.value ,
+      {[field]: this.eventRows.at(row)?.get(field)?.value}
+    )
+    .subscribe(() => {});
   }
 
-  create(): void {
-    const data: AnimalEvent = {
-      "healthIndex": 33,
-      "endDate": null,
-      "minValueDateTime": 1514844000,
-      "type": "systemHealth",
-      "cowId": 809,
-      "animalId": "871",
-      "deletable": false,
-      "lactationNumber": 1,
-      "daysInLactation": 357,
-      "ageInDays": 1075,
-      "startDateTime": 1514844000,
-      "reportingDateTime": 1514844929
-    }
-
+  create(data: CowEvent): void {
     this.cowEventService.create(data)
-      .pipe(map(res => {
-        this.limit = res.limit
-        this.total = res.total
-
-        return res.result
-      }))
-      .subscribe((res: any) => {
-      console.log('create res', res);
-        this.eventList = res
-
-        this.buildEventGridForm()
+      .subscribe((event: CowEvent) => {
+        this.eventRows.insert(
+          0,
+          new FormGroup(this.createGroup(event))
+        )
+        this.total++
     });
   }
 
-  buildEventGridForm(): void {
+  buildEventGridForm(eventList: CowEvent[]): void {
+    this.commonFields = this.cowEventService.getCommonEventFields()
     this.eventRows.clear();
-    this.eventList.forEach(event => {
-      let group: any = {}
 
-      Object.entries(event).forEach(([key, value]) => {
-        group[key] = new FormControl(value)
+    for(let event of eventList){
+      this.eventRows?.push(
+        new FormGroup(this.createGroup(event))
+      )
+    }
+  }
 
-        if(!this.tableHeader.includes(key)) this.tableHeader.push(key)
-      })
+  createGroup(event: CowEvent): any {
+    let group: any = {}
 
-      this.eventRows?.push(new FormGroup(group))
-    });
+    Object.entries(event).forEach(([key, value]) => {
+      group[key] = new FormControl(value)
+    })
 
+    return group
+  }
+
+  hasControl(control: AbstractControl, name: string): boolean {
+    return (<FormGroup>control).contains(name)
+  }
+
+  getFieldControlFromRow(control: AbstractControl, name: string): FormControl {
+    return (<FormGroup>control).get(name) as FormControl
+  }
+
+  getControlsNamesArray(control: AbstractControl): string[] {
+    return Object.keys((<FormGroup>control).controls)
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
 
-  hasControl(control: AbstractControl, name: string): boolean {
-    return (<FormGroup>control).contains(name)
+  isMetaField(block: string) {
+    return !this.commonFields.includes(block)
   }
 }

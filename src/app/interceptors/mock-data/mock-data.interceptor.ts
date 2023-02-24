@@ -5,7 +5,7 @@ import {
   HttpEvent,
   HttpInterceptor, HttpResponse
 } from '@angular/common/http';
-import {catchError, Observable, of, throwError} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import cowsMockEvents from '../../data/cows-events.json';
 import {AnimalEvent} from "../../services/cow-event/cow-event.service";
 import {CrudUrlQuery, UrlParserService} from "../../services/url-parser/url-parser.service";
@@ -39,19 +39,28 @@ export class MockDataInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    console.log(request.method.toUpperCase(), request.url)
+    console.log(request.method+' request: ', request.body)
+
     for(let el of urls) {
       if(request.url.includes(el.url+'/')){
-        const responseBody = this.transformResDepOnReqType(el, request)
+        const responseBody = this.changeResDependOnReqMethod(el, request)
 
         if(!responseBody) break;
 
-        return of(new HttpResponse({status: 200, body: responseBody } ))
+        console.log(request.method+' response:', responseBody)
+
+        return of(new HttpResponse(
+          request.method === 'DELETE'
+            ? {status: 204 }
+            : {status: 200, body: responseBody }
+        ))
       }
     }
     return next.handle(request)
   }
 
-  transformResDepOnReqType(el: IMockDataEl<AnimalEvent>, request: HttpRequest<unknown>): IResponse<AnimalEvent> | undefined {
+  changeResDependOnReqMethod(el: IMockDataEl<AnimalEvent>, request: HttpRequest<unknown>): IResponse<AnimalEvent> | AnimalEvent | undefined {
     const qParams: CrudUrlQuery = this.urlParserService.getMethodAndId(request.url, el.url)
     const reqData = request.body as AnimalEvent
 
@@ -61,29 +70,32 @@ export class MockDataInterceptor implements HttpInterceptor {
 
     if(qParams.method === 'create') {
       const newItemId = this.arrayHelperService.findMaxValueInObjArray(el.response.result, 'eventId')
-      el.response.result.unshift({...reqData, ...{eventId: newItemId}})
-      el.response.total++
-    }else if(qParams.method === 'update' && qParams.id) {
-        el.response.result =  el.response.result.map(ev => {
-          if(ev.eventId === qParams.id){
-            ev = {...ev, ...reqData}
-          }
+      el.response.result.unshift({...reqData, ...{eventId: newItemId+1}})
 
-          return ev;
-        })
+      return {...reqData, ...{eventId: newItemId+1}}
+    }else if(qParams.method === 'update' && qParams.id) {
+      el.response.result =  el.response.result.map(ev => {
+        if(ev.eventId === qParams.id){
+          ev = {...ev, ...reqData}
+        }
+
+        return ev;
+      })
+
+      return el.response.result.find(ev => ev.eventId === qParams.id);
     }else if(qParams.method === 'delete' && qParams.id) {
       el.response.result =  el.response.result.filter(ev => ev.eventId !== qParams.id)
-      el.response.total--
+
+      return {} as AnimalEvent
     }else if(qParams.method === 'get') {
       if(qParams.id){
         el.response.result =  el.response.result.filter(ev => ev.eventId === qParams.id)
       }
+
+      return el.response
     }else{
       return undefined
     }
-
-
-    return el.response
   }
 
 

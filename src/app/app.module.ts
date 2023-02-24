@@ -7,11 +7,13 @@ import { TableGridComponent } from './components/table-grid/table-grid.component
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {MockDataInterceptor} from "./interceptors/mock-data/mock-data.interceptor";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import { CreateEventComponent } from './components/create-event/create-event.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TableGridComponent
+    TableGridComponent,
+    CreateEventComponent
   ],
   imports: [
     BrowserModule,

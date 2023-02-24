@@ -1,25 +1,57 @@
-<p>table-grid works!</p>
-<!--<button (click)="delete(34719)">remove</button>-->
-<button (click)="update(34719)">update</button>
-<button (click)="create()">create</button>
-Total: {{this.total}}
+<div>Total: <strong>{{this.total}}</strong></div>
+<p style="color: orange; font-weight: bold; ">All requests are logged in the console</p>
+
+<app-create-event (onCreate)="create($event)" ></app-create-event>
 
 <form [formGroup]="EventGridForm">
   <table  formArrayName="events">
     <thead>
       <tr>
+        <th *ngFor="let field of commonFields;">{{field}}</th>
+        <th>Meta</th>
         <th></th>
-        <th *ngFor="let field of tableHeader;">{{field}}</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let event of eventRows.controls; let i = index" [formGroupName]="i">
-        <td (click)="remove(event)">X</td>
-        <td class="row" *ngFor="let field of tableHeader;" >
-          <input *ngIf="hasControl(event, field)" type="text" class="form-control" [formControlName]="field">
+      <tr *ngFor="let row of eventRows.controls; let rowIndex = index" [formGroupName]="rowIndex">
+        <td class="row" *ngFor="let fieldName of commonFields;" >
+          <ng-container *ngIf="hasControl(row, fieldName)"
+                        [ngTemplateOutlet]="formInput"
+                        [ngTemplateOutletContext]="{event: getFieldControlFromRow(row, fieldName), fieldName, rowIndex}">
+          </ng-container>
+        </td>
+        <td class="meta">
+          <div class="container grid">
+            <ng-container *ngFor="let fieldName of getControlsNamesArray(row)">
+              <div class="item" *ngIf="isMetaField(fieldName)">
+                <label class="small">
+                  {{fieldName}}
+                  <ng-container *ngIf="hasControl(row, fieldName)"
+                    [ngTemplateOutlet]="formInput"
+                    [ngTemplateOutletContext]="{event: getFieldControlFromRow(row, fieldName), fieldName, rowIndex}">
+                  </ng-container>
+                </label>
+
+              </div>
+            </ng-container>
+          </div>
+        </td>
+        <td>
+          <div class="btn c-red" (click)="remove(rowIndex)">x</div>
         </td>
       </tr>
     </tbody>
-
   </table>
 </form>
+
+
+<ng-template #formInput let-event='event' let-fieldName="fieldName" let-i="rowIndex">
+  <input
+    type="text"
+    class="form-control"
+    [readonly]="fieldName === 'eventId'"
+    [formControl]="event"
+    (change)="update(i, fieldName)"
+  >
+</ng-template>
+

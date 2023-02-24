@@ -2,94 +2,100 @@ import { Injectable } from '@angular/core';
 import {catchError, Observable, throwError} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {IResponse} from "../../interceptors/mock-data/mock-data.interceptor";
+import {BirthEvent, IBirthEvent} from "../../classes/BirthEvent";
+import {BreedingEvent, IBreedingEvent} from "../../classes/BreedingEvent";
+import {CalvingEvent, ICalvingEvent} from "../../classes/CalvingEvent";
+import {ChangeGroupEvent, IChangeGroupEvent} from "../../classes/ChangeGroupEvent";
+import {DistressEvent, IDistressEvent} from "../../classes/DistressEvent";
+import {DryOffEvent} from "../../classes/DryOffEvent";
+import {HerdEntryEvent, IHerdEntryEvent} from "../../classes/HerdEntryEvent";
+import {ISystemHealthEvent, SystemHealthEvent} from "../../classes/SystemHealthEvent";
+import {ISystemHeatEvent, SystemHeatEvent} from "../../classes/SystemHeatEvent";
+import {EventBasic} from "../../classes/EventBasic";
 
 export interface ICrud<T> {
-  get(id?: number): Observable<IResponse<T>>
-  create(data: T): Observable<IResponse<T>>
-  update(id: number, data: T): Observable<IResponse<T>>
-  delete(id: number): Observable<IResponse<T>>
+  create(data: T): Observable<T>
+  get(id: number): Observable<T>
+  getAll(): Observable<IResponse<T>>
+  update(id: number, data: fieldObj): Observable<IResponse<T>>
+  delete(id: number): Observable<null>
 }
 
-export interface ICowEventBasic {
-  eventId?: number
-  cowId: number
-  animalId: string
+export interface IBuildingEventStructure {
   type: string
-  startDateTime: number
-  reportingDateTime: number
-  lactationNumber: number
-  deletable: boolean
-  daysInLactation: number
-  ageInDays: number
+  model: any
 }
 
-export interface ICowHealthEvent extends ICowEventBasic {
-  ageInDays: number
-  endDate: number | null
-  healthIndex: number
-  minValueDateTime: number
-}
+export type fieldObj = { [key: string]: string | number | boolean }
 
-export interface ICowAlertEvent extends ICowEventBasic{
-  alertType: string
-  daysInPregnancy: number
-  duration: number
-  endDateTime: number | null
-  originalStartDateTime: number | null
-}
-
-export interface ICowHeatEvent extends ICowEventBasic {
-  heatIndexPeak: number
-}
-
-export interface ICowGroupEvent extends ICowEventBasic {
-  currentGroupId: number
-  currentGroupName: string | null
-  newGroupId: number | null
-  newGroupName: string
-}
-
-export interface ICowDestinationEvent extends ICowEventBasic {
-  cowEntryStatus: string
-  destinationGroup: number
-  destinationGroupName: string | null
-}
-
-export interface ICowBirthdayEvent extends ICowEventBasic {
-  birthDateCalculated: boolean
-}
-
-export type CowEvent = ICowHealthEvent | ICowAlertEvent | ICowHeatEvent | ICowGroupEvent | ICowDestinationEvent | ICowBirthdayEvent
-
+export type CowEvent = IBirthEvent | IBreedingEvent | ICalvingEvent | IChangeGroupEvent | IDistressEvent | DryOffEvent | IHerdEntryEvent | ISystemHealthEvent | ISystemHeatEvent
 export type AnimalEvent = CowEvent // | SheepEvent
 
 @Injectable({
   providedIn: 'root'
 })
 export class CowEventService implements ICrud<CowEvent> {
-  private apiUrl = '/api/events/cow';
+  private readonly apiUrl = '/api/events/cow';
+
+  public readonly fullEventList: IBuildingEventStructure[] = [
+    {type: 'birth', model: BirthEvent },
+    {type: 'breeding', model: BreedingEvent },
+    {type: 'calving', model: CalvingEvent },
+    {type: 'changeGroup', model: ChangeGroupEvent },
+    {type: 'distress', model: DistressEvent },
+    {type: 'dryOff', model: DryOffEvent },
+    {type: 'herdEntry', model: HerdEntryEvent },
+    {type: 'systemHealth', model: SystemHealthEvent },
+    {type: 'systemHeat', model: SystemHeatEvent }
+  ]
 
   constructor(
     private http: HttpClient
-  ) { }
+  ) {
 
-  create(data: CowEvent): Observable<IResponse<CowEvent>> {
-    console.log('PUT', `${this.apiUrl}/create`, data);
-    return this.http.put<IResponse<CowEvent>>(`${this.apiUrl}/create`, data)
   }
 
-  get(id?: number): Observable<IResponse<CowEvent>> {
-    console.log('GET', `${this.apiUrl}/get${id ? '/'+id : ''}`);
-    return this.http.get<IResponse<CowEvent>>(`${this.apiUrl}/get${id ? '/'+id : ''}`)
+  create(data: CowEvent): Observable<CowEvent> {
+    return this.http.post<CowEvent>(`${this.apiUrl}/create`, data)
+      .pipe(catchError(error => {
+        // handle errors
+        return throwError(error)
+      }))
   }
 
-  update(id: number, data: CowEvent): Observable<IResponse<CowEvent>> {
-    console.log('POST', `${this.apiUrl}/update/${id}`, data);
-    return this.http.post<IResponse<CowEvent>>(`${this.apiUrl}/update/${id}`, data)
+  getAll(): Observable<IResponse<CowEvent>> {
+    return this.http.get<IResponse<CowEvent>>(`${this.apiUrl}/get`)
+      .pipe(catchError(error => {
+        // handle errors
+        return throwError(error)
+      }))
   }
 
-  delete(id: number): Observable<IResponse<CowEvent>> {
-    console.log('DELETE', `${this.apiUrl}/delete/${id}`);
-    return this.http.delete<IResponse<CowEvent>>(`${this.apiUrl}/delete/${id}`)
+  get(id: number): Observable<CowEvent> {
+    return this.http.get<CowEvent>(`${this.apiUrl}/get/${id}`)
+      .pipe(catchError(error => {
+        // handle errors
+        return throwError(error)
+      }))
+  }
+
+  update(id: number, data: fieldObj): Observable<IResponse<CowEvent>> {
+    return this.http.put<IResponse<CowEvent>>(`${this.apiUrl}/update/${id}`, data)
+      .pipe(catchError(error => {
+        // handle errors
+        return throwError(error)
+      }))
+  }
+
+  delete(id: number): Observable<null> {
+    return this.http.delete<null>(`${this.apiUrl}/delete/${id}`)
+      .pipe(catchError(error => {
+        // handle errors
+        return throwError(error)
+      }))
+  }
+
+  getCommonEventFields(): string[] {
+    return Object.getOwnPropertyNames(new EventBasic);
   }
 }

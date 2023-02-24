@@ -1,0 +1,16 @@
+<select [(ngModel)]="currentNewEventType" (change)="changeCreationForm()" >
+  <option value="" [innerHTML]="currentNewEventType ? '' : 'Add New Event'" ></option>
+  <option *ngFor="let ev of eventStructure" [value]="ev.type">{{ev.type}}</option>
+</select>
+
+<form *ngIf="fieldsList.length" [formGroup]="NewEventForm" (submit)="send()" >
+  <div class="container grid">
+    <div *ngFor="let field of fieldsList; let i = index" >
+      <label class="small">
+        {{field}}
+        <input type="text" class="form-control" [formControlName]="field">
+      </label>
+    </div>
+    <div><input class="btn" type="submit" value="Emit"></div>
+  </div>
+</form>
