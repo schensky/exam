@@ -4,15 +4,18 @@
 <app-create-event (onCreate)="create($event)" ></app-create-event>
 
 <form [formGroup]="EventGridForm">
-  <table  formArrayName="events">
+  <table>
     <thead>
       <tr>
         <th *ngFor="let field of commonFields;">{{field}}</th>
-        <th>Meta</th>
+        <th>
+          Meta
+          <label>(<input type="checkbox" formControlName="metaInRow" > in a row)</label>
+        </th>
         <th></th>
       </tr>
     </thead>
-    <tbody>
+    <tbody formArrayName="events" >
       <tr *ngFor="let row of eventRows.controls; let rowIndex = index" [formGroupName]="rowIndex">
         <td class="row" *ngFor="let fieldName of commonFields;" >
           <ng-container *ngIf="hasControl(row, fieldName)"
@@ -21,7 +24,7 @@
           </ng-container>
         </td>
         <td class="meta">
-          <div class="container grid">
+          <div class="container" [ngClass]="{'grid' : !EventGridForm.get('metaInRow')?.value}">
             <ng-container *ngFor="let fieldName of getControlsNamesArray(row)">
               <div class="item" *ngIf="isMetaField(fieldName)">
                 <label class="small">
@@ -31,7 +34,6 @@
                     [ngTemplateOutletContext]="{event: getFieldControlFromRow(row, fieldName), fieldName, rowIndex}">
                   </ng-container>
                 </label>
-
               </div>
             </ng-container>
           </div>
@@ -43,7 +45,6 @@
     </tbody>
   </table>
 </form>
-
 
 <ng-template #formInput let-event='event' let-fieldName="fieldName" let-i="rowIndex">
   <input

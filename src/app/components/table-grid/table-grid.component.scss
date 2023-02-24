@@ -1,10 +1,12 @@
 $border-color-main: #e4e0e0;
-$border-color-secondary: #f3f1f1;
+$border-color-secondary: #e1dede;
 $bg-color-odd: #fafdff;
 
 .btn {
   cursor: pointer;
   padding: 4px;
+  width: 20px;
+  height: 20px;
   text-align: center;
 }
 
@@ -29,10 +31,6 @@ table {
     tr {
       &:nth-child(odd) {
         background-color: $bg-color-odd;
-
-        input {
-          background-color: $bg-color-odd;
-        }
       }
 
       td {
@@ -44,10 +42,24 @@ table {
 
         input {
           border-color: transparent;
-          max-width:80px;
+          background-color: transparent;
         }
 
         .container {
+          display: flex;
+          background-color: #d9d9d957;
+          margin: 2px;
+
+          &:not(.grid) {
+            .item {
+              padding: 2px 4px;
+
+              &:not(:first-child) {
+                border-left: 1px solid $border-color-secondary;
+              }
+            }
+          }
+
           &.grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -62,15 +74,12 @@ table {
               &:nth-child(odd){
                 border-right: 1px solid $border-color-secondary;
               }
-
-
             }
           }
         }
       }
     }
   }
-
 }
 
 

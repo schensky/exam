@@ -24,6 +24,7 @@ export class TableGridComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ){
     this.EventGridForm = this.fb.group({
+      metaInRow: [true],
       events: this.fb.array([])
     })
   }
