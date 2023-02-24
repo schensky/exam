@@ -49,6 +49,7 @@ export class MockDataInterceptor implements HttpInterceptor {
         if(!responseBody) break;
 
         console.log(request.method+' response:', responseBody)
+        console.log('---------------------------------------------------')
 
         return of(new HttpResponse(
           request.method === 'DELETE'
