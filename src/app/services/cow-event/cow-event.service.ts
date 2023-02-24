@@ -17,7 +17,7 @@ export interface ICrud<T> {
   create(data: T): Observable<T>
   get(id: number): Observable<T>
   getAll(): Observable<IResponse<T>>
-  update(id: number, data: fieldObj): Observable<IResponse<T>>
+  update(id: number, data: fieldObj): Observable<T>
   delete(id: number): Observable<null>
 }
 
@@ -79,8 +79,8 @@ export class CowEventService implements ICrud<CowEvent> {
       }))
   }
 
-  update(id: number, data: fieldObj): Observable<IResponse<CowEvent>> {
-    return this.http.put<IResponse<CowEvent>>(`${this.apiUrl}/update/${id}`, data)
+  update(id: number, data: fieldObj): Observable<CowEvent> {
+    return this.http.put<CowEvent>(`${this.apiUrl}/update/${id}`, data)
       .pipe(catchError(error => {
         // handle errors
         return throwError(error)

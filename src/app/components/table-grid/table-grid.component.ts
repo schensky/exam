@@ -44,11 +44,11 @@ export class TableGridComponent implements OnInit, OnDestroy {
       });
   }
 
-  remove(index: number): void {
-    let id = this.eventRows.at(index).get('eventId')?.value
+  remove(row: number): void {
+    let id = this.eventRows.at(row).get('eventId')?.value
     this.cowEventService.delete(id)
       .subscribe(() => {
-        this.eventRows.removeAt(index)
+        this.eventRows.removeAt(row)
         this.total--
       });
   }
@@ -58,7 +58,10 @@ export class TableGridComponent implements OnInit, OnDestroy {
       +this.eventRows.at(row).get('eventId')?.value ,
       {[field]: this.eventRows.at(row)?.get(field)?.value}
     )
-    .subscribe(() => {});
+    .subscribe((event: CowEvent) => {
+      this.eventRows.removeAt(row)
+      this.eventRows.insert(row, new FormGroup(this.createGroup(event)))
+    });
   }
 
   create(data: CowEvent): void {

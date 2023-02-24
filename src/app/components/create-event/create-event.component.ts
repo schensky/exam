@@ -9,7 +9,7 @@ import {CowEvent, CowEventService, IBuildingEventStructure} from "../../services
 })
 export class CreateEventComponent {
   NewEventForm: FormGroup
-  currentNewEventType!: string
+  currentNewEventType: string = ''
   fieldsList: string[] = []
 
   @Output()

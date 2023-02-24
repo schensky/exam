@@ -1,6 +1,7 @@
 $border-color-main: #e4e0e0;
 $border-color-secondary: #e1dede;
 $bg-color-odd: #fafdff;
+$bg-color-meta: #d9d9d957;
 
 .btn {
   cursor: pointer;
@@ -23,7 +24,17 @@ table {
       font-size: 12px;
       font-weight: normal;
       color: grey;
-      padding: 8px 2px;
+      padding: 10px 4px;
+
+      &.meta-column {
+        background-color: $bg-color-meta;
+
+        .inner {
+          text-align: left;
+          padding-left: 25px;
+          margin: 2px;
+        }
+      }
     }
   }
 
@@ -47,7 +58,7 @@ table {
 
         .container {
           display: flex;
-          background-color: #d9d9d957;
+          background-color: $bg-color-meta;
           margin: 2px;
 
           &:not(.grid) {

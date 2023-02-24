@@ -8,9 +8,11 @@
     <thead>
       <tr>
         <th *ngFor="let field of commonFields;">{{field}}</th>
-        <th>
-          Meta
-          <label>(<input type="checkbox" formControlName="metaInRow" > in a row)</label>
+        <th class="meta-column">
+          <div class="inner">
+            Meta
+            <label>(<input type="checkbox" formControlName="metaInRow" > in a row)</label>
+          </div>
         </th>
         <th></th>
       </tr>
